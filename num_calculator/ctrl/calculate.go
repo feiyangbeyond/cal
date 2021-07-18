@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"num_calculator/service"
 
@@ -132,7 +133,11 @@ func Calculate(c *gin.Context) {
 	num := Add0(nums)
 	num.CalRank()
 	rows := num.BuildExcelRows()
-	service.GenerateExcel(rows, c)
+	filename := time.Now().Format("20060102150405") + ".xlsx"
+	go service.GenerateExcel(rows, filename)
+	c.JSON(200, gin.H{
+		"data": filename,
+	})
 }
 
 func Download(c *gin.Context) {
@@ -141,6 +146,7 @@ func Download(c *gin.Context) {
 		c.JSON(404, "404")
 		return
 	}
+
 	f, err := os.Open("/root/excel/" + filename)
 	defer f.Close()
 	if err != nil {

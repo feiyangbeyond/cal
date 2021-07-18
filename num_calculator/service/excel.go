@@ -3,13 +3,16 @@ package service
 import (
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/360EntSecGroup-Skylar/excelize/v2"
-	"github.com/gin-gonic/gin"
 )
 
-func GenerateExcel(rows [][]string, c *gin.Context) {
+func GenerateExcel(rows [][]string, filename string) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("panic at ")
+		}
+	}()
 	excel := excelize.NewFile()
 	sheet1 := "Sheet1"
 
@@ -19,12 +22,9 @@ func GenerateExcel(rows [][]string, c *gin.Context) {
 			_ = excel.SetCellStr(sheet1, xy, s)
 		}
 	}
-	filename := time.Now().Format("20060102150405") + ".xlsx"
+
 	err := excel.SaveAs("/root/excel/" + filename)
 	if err != nil {
 		fmt.Println(err)
 	}
-	c.JSON(200, gin.H{
-		"data": filename,
-	})
 }
